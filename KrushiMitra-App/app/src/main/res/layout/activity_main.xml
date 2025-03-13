@@ -70,7 +70,7 @@
         android:id="@+id/btn_send_otp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Send OTP"
+        android:text="Submit"
         android:textSize="18sp"
         android:textColor="@android:color/black"
         android:backgroundTint="@color/darkgreen"
