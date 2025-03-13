@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:background="@color/fikkagreen"
+    android:gravity="center_horizontal">
+
+    <!-- Header Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KrushiMitra"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"/>
+
+        <!-- Uncomment if the drawable exists -->
+
+<!--        <ImageView-->
+<!--            android:layout_width="24dp"-->
+<!--            android:layout_height="24dp"-->
+<!--            android:src="@drawable/translate_icon"-->
+<!--            android:contentDescription="Translator Icon"-->
+<!--            android:tint="@android:color/black"/>-->
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp"/>
+
+    <EditText
+        android:id="@+id/et_mobile_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Mobile Number"
+        android:inputType="phone"
+        android:paddingTop="200dp"
+        android:backgroundTint="@android:color/darker_gray"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp"/>
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="numberPassword"
+        android:backgroundTint="@android:color/darker_gray"/>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="24dp"/>
+
+    <Button
+        android:id="@+id/btn_send_otp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send OTP"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@color/darkgreen"
+        android:padding="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center"
+        android:gravity="center"/>
+</LinearLayout>
