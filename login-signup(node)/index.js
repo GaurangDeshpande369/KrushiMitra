@@ -8,6 +8,7 @@ const templatePath = path.join(__dirname, './templates');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public")); // ✅ Serving static files
 app.set("view engine", "hbs");
 app.set("views", templatePath);
 
@@ -16,7 +17,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'krushimitra_users' // Make sure this database exists in MySQL
+    database: 'krushimitra_users'
 });
 
 db.connect((err) => {
@@ -37,26 +38,6 @@ app.get("/signup", (req, res) => {
     res.render("signup");
 });
 
-// ✅ Handle Login Request
-app.post("/login", (req, res) => {
-    const { phone, password } = req.body;
-
-    // Ensure the exact match with case sensitivity
-    const query = "SELECT * FROM user_info WHERE BINARY Phone_number = ? AND BINARY password = ?";
-    db.query(query, [phone, password], (err, results) => {
-        if (err) {
-            console.error("❌ Error querying database:", err);
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
-
-        if (results.length > 0) {
-            res.render("dashboard"); // ✅ Redirect to Dashboard
-        } else {
-            res.send("❌ Invalid Credentials");
-        }
-    });
-});
-
 // ✅ Handle Signup Request
 app.post("/signup", (req, res) => {
     const { phone, password } = req.body;
@@ -69,7 +50,7 @@ app.post("/signup", (req, res) => {
         }
 
         if (results.length > 0) {
-            return res.send("Phone number already registered. Please use a different one.");
+            return res.render("signup", { error: "❌ Phone number already registered." });
         }
 
         const insertQuery = "INSERT INTO user_info (Phone_number, password) VALUES (?, ?)";
@@ -78,8 +59,27 @@ app.post("/signup", (req, res) => {
                 console.error("Error inserting into database:", err);
                 return res.status(500).json({ message: "Internal Server Error" });
             }
-            res.redirect("/dashboard");  // Redirect to dashboard on successful signup
+            res.redirect("/dashboard");  // ✅ Redirect to dashboard on successful signup
         });
+    });
+});
+
+// ✅ Handle Login Request
+app.post("/login", (req, res) => {
+    const { phone, password } = req.body;
+
+    const query = "SELECT * FROM user_info WHERE BINARY Phone_number = ? AND BINARY password = ?";
+    db.query(query, [phone, password], (err, results) => {
+        if (err) {
+            console.error("❌ Error querying database:", err);
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+
+        if (results.length > 0) {
+            res.redirect("/dashboard"); // ✅ Redirect to Dashboard
+        } else {
+            res.render("login", { error: "❌ Invalid Phone Number or Password" });
+        }
     });
 });
 
