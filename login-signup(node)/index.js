@@ -1,16 +1,12 @@
 const express = require('express');
-const path = require('path');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const cors = require('cors'); // ✅ Allow requests from Android App
 
 const app = express();
-const templatePath = path.join(__dirname, './templates');
-
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public")); // ✅ Serving static files
-app.set("view engine", "hbs");
-app.set("views", templatePath);
+app.use(cors()); // ✅ Enable CORS to allow Android app requests
 
 // ✅ MySQL Database Connection
 const db = mysql.createConnection({
@@ -28,64 +24,53 @@ db.connect((err) => {
     }
 });
 
-// ✅ Render Login Page
-app.get("/", (req, res) => {
-    res.render("login");
-});
-
-// ✅ Render Signup Page
-app.get("/signup", (req, res) => {
-    res.render("signup");
-});
-
-// ✅ Handle Signup Request
+// ✅ Handle Signup Request (API for Android)
 app.post("/signup", (req, res) => {
     const { phone, password } = req.body;
 
     const checkQuery = "SELECT * FROM user_info WHERE Phone_number = ?";
     db.query(checkQuery, [phone], (err, results) => {
         if (err) {
-            console.error("Error checking database:", err);
+            console.error("❌ Error checking database:", err);
             return res.status(500).json({ message: "Internal Server Error" });
         }
 
         if (results.length > 0) {
-            return res.render("signup", { error: "❌ Phone number already registered." });
+            return res.status(400).json({ message: "Phone number already registered." });
         }
 
         const insertQuery = "INSERT INTO user_info (Phone_number, password) VALUES (?, ?)";
         db.query(insertQuery, [phone, password], (err, result) => {
             if (err) {
-                console.error("Error inserting into database:", err);
+                console.error("❌ Error inserting into database:", err);
                 return res.status(500).json({ message: "Internal Server Error" });
             }
-            res.redirect("/dashboard");  // ✅ Redirect to dashboard on successful signup
+            res.status(201).json({ message: "Signup successful!" });
         });
     });
 });
 
-// ✅ Handle Login Request
-app.post("/", (req, res) => {
+// ✅ Handle Login Request (API for Android)
+app.post("/login", (req, res) => {
     const { phone, password } = req.body;
 
-    const query = "SELECT * FROM user_info WHERE BINARY Phone_number = ? AND BINARY password = ?";
-    db.query(query, [phone, password], (err, results) => {
+    const query = "SELECT * FROM user_info WHERE Phone_number = ?";
+    db.query(query, [phone], (err, results) => {
         if (err) {
             console.error("❌ Error querying database:", err);
             return res.status(500).json({ message: "Internal Server Error" });
         }
 
         if (results.length > 0) {
-            res.redirect("/dashboard"); // ✅ Redirect to Dashboard
+            if (results[0].password === password) {
+                res.status(200).json({ message: "Login successful!" });
+            } else {
+                res.status(401).json({ message: "Incorrect password." });
+            }
         } else {
-            res.render("login", { error: "❌ Invalid Phone Number or Password" });
+            res.status(404).json({ message: "Phone number not registered." });
         }
     });
-});
-
-// ✅ Render Dashboard Page
-app.get("/dashboard", (req, res) => {
-    res.render("dashboard");
 });
 
 // ✅ Start Server
