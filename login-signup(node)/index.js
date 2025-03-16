@@ -65,7 +65,7 @@ app.post("/signup", (req, res) => {
 });
 
 // ✅ Handle Login Request
-app.post("/login", (req, res) => {
+app.post("/", (req, res) => {
     const { phone, password } = req.body;
 
     const query = "SELECT * FROM user_info WHERE BINARY Phone_number = ? AND BINARY password = ?";
