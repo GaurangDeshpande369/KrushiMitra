@@ -1,105 +1,81 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const path = require('path');
 
-// Initialize the Express app
 const app = express();
-app.use(bodyParser.json()); // To parse JSON request body
+app.use(bodyParser.json());
+app.use(express.static('public')); // Serve static files from the "public" folder
 
-// Create the MySQL connection
+// MySQL Connection
 const db = mysql.createConnection({
-  host: 'localhost',        // Database host
-  user: 'root',             // Database user
-  password: '',             // Database password
-  database: 'krushimitra_users'  // Database name
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'krushimitra_users'
 });
 
-// Connect to the database
 db.connect(err => {
   if (err) {
-    console.error('Error connecting to the database:', err);
+    console.error('Database connection failed:', err);
     return;
   }
-  console.log('Connected to the database');
+  console.log('Connected to MySQL');
 });
 
-// Function to check if the phone number exists and validate the password
-function checkPhoneNumberAndPassword(phoneNumber, password, callback) {
-  const query = 'SELECT * FROM user_info WHERE Phone_number = ?';
-  db.execute(query, [phoneNumber], (err, results) => {
-    if (err) {
-      return callback(err, null);
-    }
-    if (results.length > 0) {
-      // Phone number exists, check the password
-      if (results[0].password === password) {
-        return callback(null, { message: 'Login successful, redirecting to dashboard.' });
-      } else {
-        return callback({ message: 'Incorrect password' }, null);
-      }
-    } else {
-      return callback({ message: 'Phone number does not exist' }, null);
-    }
-  });
-}
+// Serve the login/register page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-// Function to insert a new phone number and password into the table
-function insertPhoneNumberAndPassword(phoneNumber, password, callback) {
-  const query = 'INSERT INTO user_info (Phone_number, password) VALUES (?, ?)';
-  db.execute(query, [phoneNumber, password], (err, results) => {
-    if (err) {
-      return callback(err, null);
-    }
-    return callback(null, { message: 'User successfully registered.' });
-  });
-}
-
-// POST route to check if phone number exists and validate password
-app.post('/login', (req, res) => {
+// Handle login & registration
+app.post('/auth', (req, res) => {
   const { phoneNumber, password } = req.body;
 
   if (!phoneNumber || !password) {
-    return res.status(400).send({ message: 'Phone number and password are required.' });
+    return res.status(400).json({ message: 'Phone number and password are required.' });
   }
 
-  checkPhoneNumberAndPassword(phoneNumber, password, (err, result) => {
-    if (err) {
-      return res.status(400).send(err);
-    }
-    return res.status(200).send(result);
-  });
-});
-
-// POST route to register a new phone number and password if it doesn't exist
-app.post('/register', (req, res) => {
-  const { phoneNumber, password } = req.body;
-
-  if (!phoneNumber || !password) {
-    return res.status(400).send({ message: 'Phone number and password are required.' });
-  }
-
-  // First, check if the phone number already exists
   const checkQuery = 'SELECT * FROM user_info WHERE Phone_number = ?';
+
   db.execute(checkQuery, [phoneNumber], (err, results) => {
     if (err) {
-      return res.status(500).send({ message: 'Database error.' });
-    }
-    if (results.length > 0) {
-      return res.status(400).send({ message: 'Phone number already exists.' });
+      return res.status(500).json({ message: 'Database error.' });
     }
 
-    // If phone number doesn't exist, insert it
-    insertPhoneNumberAndPassword(phoneNumber, password, (err, result) => {
-      if (err) {
-        return res.status(500).send({ message: 'Error registering user.' });
+    if (results.length > 0) {
+      // Phone number exists, check password
+      if (results[0].password === password) {
+        return res.status(200).json({ message: 'Login successful, redirecting to dashboard.' });
+      } else {
+        return res.status(401).json({ message: 'Incorrect password.' });
       }
-      return res.status(200).send(result);
-    });
+    } else {
+      // Phone number not found, register user
+      const insertQuery = 'INSERT INTO user_info (Phone_number, password) VALUES (?, ?)';
+
+      db.execute(insertQuery, [phoneNumber, password], (err) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error registering user.' });
+        }
+        return res.status(200).json({ message: 'Registration successful, redirecting to dashboard.' });
+      });
+    }
   });
 });
 
-// Start the Express server on port 3000
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+// Serve the dashboard page
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Logout route (redirects back to login page)
+app.post('/logout', (req, res) => {
+  res.status(200).json({ message: 'Logged out successfully' });
+});
+
+// Start the server
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

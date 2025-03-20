@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #108600;
+            transition: background-color 0.8s ease-in-out, opacity 0.5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        /* Logout Button (Top-right) */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+
+        /* Main Dashboard Container */
+        .container {
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+            width: 80%;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.5);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Welcome Text */
+        .welcome {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Grid Layout for Buttons */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .grid button {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        .grid button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body id="dashboardBody">
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <!-- Dashboard Container -->
+    <div class="container" id="dashboardContainer">
+        <div class="welcome" id="welcomeMessage">Welcome, User</div>
+        <div class="grid">
+            <button>Farm 1</button>
+            <button>Farm 2</button>
+            <button>Farm 3</button>
+            <button>Farm 4</button>
+            <button>Farm 5</button>
+            <button>Farm 6</button>
+            <button>Farm 7</button>
+            <button>Farm 8</button>
+            <button>Farm 9</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const body = document.getElementById("dashboardBody");
+            const container = document.getElementById("dashboardContainer");
+            const welcomeMessage = document.getElementById("welcomeMessage");
+
+            // Get the stored phone number from sessionStorage
+            const phoneNumber = sessionStorage.getItem("phoneNumber") || "User";
+            welcomeMessage.textContent = `Welcome, ${phoneNumber}`;
+
+            // Apply animation
+            setTimeout(() => {
+                body.style.opacity = "1";
+                container.classList.add("show");
+            }, 100);
+        });
+
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    sessionStorage.removeItem("phoneNumber");
+                    window.location.href = '/';
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #c3ffcb;
+            transition: background-color 0.8s ease-in-out;
+            overflow: hidden;
+        }
+
+        h2 {
+            font-family: "Playfair Display", serif;
+            font-size: 50px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+            width: 350px;
+            transition: transform 0.6s ease-in-out, opacity 0.5s ease-in-out;
+        }
+
+        .zoom-out {
+            transform: scale(1.2);
+            opacity: 0;
+        }
+
+        input {
+            width: 93%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #108600;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #218838;
+        }
+        
+        p {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body id="loginBody">
+    <div class="container" id="loginContainer">
+        <h2><b>KrushiMitra</b></h2>
+        <form id="authForm">
+            <input type="text" id="phoneNumber" placeholder="Enter Phone Number" required>
+            <input type="password" id="password" placeholder="Enter Password" required>
+            <button type="submit">Submit</button>
+        </form>
+        <p id="authMessage"></p>
+    </div>
+
+    <script>
+        document.getElementById("authForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const phoneNumber = document.getElementById("phoneNumber").value;
+            const password = document.getElementById("password").value;
+            const loginContainer = document.getElementById("loginContainer");
+            const loginBody = document.getElementById("loginBody");
+
+            // Change background color before redirect
+            loginBody.style.backgroundColor = "#108600";
+            
+            // Add zoom-out effect
+            loginContainer.classList.add("zoom-out");
+
+            sessionStorage.setItem("animateDashboard", "true");
+
+            setTimeout(async () => {
+                const response = await fetch("/auth", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phoneNumber, password })
+                });
+
+                const result = await response.json();
+                document.getElementById("authMessage").textContent = result.message;
+
+                if (response.ok) {
+                    window.location.href = "/dashboard";
+                } else {
+                    loginContainer.classList.remove("zoom-out"); // Remove effect if login fails
+                }
+            }, 600);
+        });
+    </script>
+</body>
+</html>
